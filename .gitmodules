@@ -1,0 +1,3 @@
+[submodule "LODE-GPs"]
+	path = LODE-GPs
+	url = git@github.com:ABesginow/LODE-GPs.git
