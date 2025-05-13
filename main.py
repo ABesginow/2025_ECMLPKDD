@@ -5,33 +5,44 @@ import sage
 import torch
 
 
-train_x = torch.linspace(0, 1, 100)
-train_y = torch.linspace(0, 1, 100)
-likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
+# Generate a solution to the physical system
+START = 2
+END = 12
+COUNT = 100
+train_x = torch.linspace(START, END, COUNT)
 
-print(list_standard_models())
-
-
-
-
-
-
-
-
-
-
+y0_func = lambda x: float(781/8000)*torch.sin(x)/x - float(1/20)*torch.cos(x)/x**2 + float(1/20)*torch.sin(x)/x**3
+y1_func = lambda x: float(881/8000)*torch.sin(x)/x - float(1/40)*torch.cos(x)/x**2 + float(1/40)*torch.sin(x)/x**3
+y2_func = lambda x: float(688061/800000)*torch.sin(x)/x - float(2543/4000)*torch.cos(x)/x**2 + float(1743/4000)*torch.sin(x)/x**3 - float(3/5)*torch.cos(x)/x**4 + float(3/5)*torch.sin(x)/x**5 
+y0 = y0_func(train_x)
+y1 = y1_func(train_x)
+y2 = y2_func(train_x)
+train_y = torch.stack([y0, y1, y2], dim=1)
 
 
-R = QQ['x']; (x,) = R._first_ngens(1)
-# Linearized bipendulum
-#A = matrix(R, Integer(2), Integer(3), [x**2 + 9.81, 0, -1, 0, x**2+4.905, -1/2])
-#A = matrix(R, Integer(1), Integer(3), [x**2 + 9.81, 0, -1])
-#A = matrix(R, Integer(1), Integer(3), [0, x**2+4.905, -1/2])
-#A = matrix(R, Integer(1), Integer(3), [0, 0, 0])
-#LODEGP(train_x, train_y, likelihood, 3, A=A, verbose=True)
+# Bipendulum versions to test:
+# "Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"
+for system_name in ["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"]:
+    print(f"Testing system: {system_name}")
+    # 1. Model definition
+    likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
+    LODEGP(train_x, train_y, likelihood, 3, ODE_name=system_name, verbose=True, system_parameters={"l1": 1.0, "l2": 2.0})
 
-LODEGP(train_x, train_y, likelihood, 3, ODE_name="Bipendulum Parameterized", verbose=True)
-#LODEGP(train_x, train_y, likelihood, 3, ODE_name="Heating", verbose=True)
+
+    # 2. Model training (10 random restarts with PyGRANSO) (try MLL and MAP with uninformed prior)
+
+
+    # 3. Draw model posterior
+
+
+    # 4. Calculate precision? i.e. finite difference of samples on eval points
+
+
+    
+
+
+
+
 
 
 
