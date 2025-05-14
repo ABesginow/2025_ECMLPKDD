@@ -36,11 +36,11 @@ for system_name in ["Bipendulum", "Bipendulum first equation", "Bipendulum secon
     # 2. Model training (10 random restarts with PyGRANSO) (try MLL and MAP with uninformed prior)
     model.train()
     likelihood.train()
-    #unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=True, MAP=False)
+    unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=True, MAP=False)
 
     model_MAP.train()
     likelihood_MAP.train()
-    #unscaled_neg_MLL, model_MAP, likelihood_MAP, training_logs = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=True, MAP=True)
+    unscaled_neg_MLL, model_MAP, likelihood_MAP, training_logs = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=True, MAP=True)
 
     # 3. Draw model posterior
     test_x = torch.linspace(START, END, COUNT)
@@ -52,6 +52,9 @@ for system_name in ["Bipendulum", "Bipendulum first equation", "Bipendulum secon
         pred_mean = observed_pred.mean
         pred_var = observed_pred.covariance_matrix
         pred_var = torch.diagonal(pred_var)
+        # Reslice the pred_var to have a tensor of the same shape as pred_mean
+        # Do this by putting every n-th element in the n-th dimension
+        pred_var = pred_var.view(pred_mean.shape[0], -1)
     
     MLL_model_posterior_fig = plot_single_input_gp_posterior(train_x, train_y, test_x, pred_mean, pred_var, n_std=2, show=False, return_fig=True, fig=None, ax=None, colors=plot_colors, ncols=3, figsize=(20, 5), titles=["$f_1$", "$f_2$", "$u$"], xlabel="Time", ylabel="Output")
 
@@ -62,6 +65,9 @@ for system_name in ["Bipendulum", "Bipendulum first equation", "Bipendulum secon
         pred_mean = observed_pred.mean
         pred_var = observed_pred.covariance_matrix
         pred_var = torch.diagonal(pred_var)
+        # Reslice the pred_var to have a tensor of the same shape as pred_mean
+        # Do this by putting every n-th element in the n-th dimension
+        pred_var = pred_var.view(pred_mean.shape[0], -1)
     
     MAP_model_posterior_fig = plot_single_input_gp_posterior(train_x, train_y, test_x, pred_mean, pred_var, n_std=2, show=False, return_fig=True, fig=None, ax=None, colors=plot_colors, ncols=3, figsize=(20, 5), titles=["$f_1$", "$f_2$", "$u$"], xlabel="Time", ylabel="Output")
 
