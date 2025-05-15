@@ -6,6 +6,7 @@ from sage.all import *
 import sage
 import torch
 
+torch.set_default_dtype(torch.float64)
 
 # Generate a solution to the physical system
 START = 2
