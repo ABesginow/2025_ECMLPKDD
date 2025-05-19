@@ -1,1 +1,2 @@
--e lib/lodegp
+-e lib/LODEGP/lodegp
+-e lib/helpers/helpers
