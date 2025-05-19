@@ -2,6 +2,7 @@ import gpytorch
 from LODEGP.LODEGP import LODEGP
 from helpers.training_functions import granso_optimization
 from helpers.plotting_functions import plot_single_input_gp_posterior
+from helpers.util_functions import central_difference
 from sage.all import *
 import sage
 import torch
