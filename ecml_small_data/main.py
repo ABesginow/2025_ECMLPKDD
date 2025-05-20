@@ -1,5 +1,6 @@
 import gpytorch
-from LODEGP.LODEGP import LODEGP
+import itertools
+from lodegp import LODEGP
 from helpers.training_functions import granso_optimization
 from helpers.plotting_functions import plot_single_input_gp_posterior
 from helpers.util_functions import central_difference
@@ -25,14 +26,16 @@ train_y = torch.stack([y0, y1, y2], dim=-1)
 
 # Bipendulum versions to test:
 # "Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"
-for system_name in ["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"]:
+for (system_name, length_params) in itertools.product(["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"], [[1.0, 2.0], [1.0, 3.0], [2.0, 3.0]]):
+    l1_param_val = length_params[0]
+    l2_param_val = length_params[1]
     print(f"Testing system: {system_name}")
     # 1. Model definition
     likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
-    model = LODEGP(train_x, train_y, likelihood, 3, ODE_name=system_name, verbose=True, system_parameters={"l1": 1.0, "l2": 2.0})
+    model = LODEGP(train_x, train_y, likelihood, 3, ODE_name=system_name, verbose=True, system_parameters={"l1": l1_param_val, "l2": l2_param_val})
 
     likelihood_MAP = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
-    model_MAP = LODEGP(train_x, train_y, likelihood_MAP, 3, ODE_name=system_name, verbose=True, system_parameters={"l1": 1.0, "l2": 2.0})
+    model_MAP = LODEGP(train_x, train_y, likelihood_MAP, 3, ODE_name=system_name, verbose=True, system_parameters={"l1": l1_param_val, "l2": l2_param_val})
 
 
     # 2. Model training (10 random restarts with PyGRANSO) (try MLL and MAP with uninformed prior)
