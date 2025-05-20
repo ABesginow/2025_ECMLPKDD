@@ -26,7 +26,7 @@ train_y = torch.stack([y0, y1, y2], dim=-1)
 
 # Bipendulum versions to test:
 # "Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"
-for (system_name, length_params) in itertools.product(["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"], [[1.0, 2.0], [1.0, 3.0], [2.0, 3.0]]):
+for (system_name, length_params) in itertools.chain(itertools.product(["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Sum eq2 diffed"], [[1.0, 2.0], [1.0, 3.0], [2.0, 3.0]]), [("Bipendulum Parameterized", [1.0, 2.0]),  ("No system", [1.0, 2.0])]):
     l1_param_val = length_params[0]
     l2_param_val = length_params[1]
     print(f"Testing system: {system_name}")
