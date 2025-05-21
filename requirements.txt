@@ -1,2 +1,4 @@
 -e lib/LODEGP
 -e lib/helpers
+gpytorch
+torch
