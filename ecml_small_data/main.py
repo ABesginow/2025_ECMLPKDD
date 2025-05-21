@@ -15,11 +15,6 @@ torch.set_default_dtype(torch.float64)
 R = QQ['x']; (x,) = R._first_ngens(1)
 true_system_description = matrix(R, Integer(2), Integer(3), [x**2 + 9.81/1.0, 0, -1/1.0, 0, x**2+9.81/2.0, -1/2.0])
 
-
-
-
-
-
 for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [1, 2, 5, 10, 20, 50, 100], [0.0, 0.1, 0.2, 0.3]):
     train_x = torch.linspace(START, END, COUNT)
 
@@ -85,7 +80,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
         # 2. Model training (10 random restarts with PyGRANSO) (try MLL and MAP with uninformed prior)
         model.train()
         likelihood.train()
-        unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=False)
+        unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=1, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=False)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL.pkl"), "wb") as f:
             dill.dump(unscaled_neg_MLL, f)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL_logs.pkl"), "wb") as f:
@@ -99,7 +94,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
 
         model_MAP.train()
         likelihood_MAP.train()
-        unscaled_neg_MAP, model_MAP, likelihood_MAP, training_logs_MAP = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=True)
+        unscaled_neg_MAP, model_MAP, likelihood_MAP, training_logs_MAP = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=1, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=True)
 
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MAP.pkl"), "wb") as f:
             dill.dump(unscaled_neg_MAP, f)
@@ -162,7 +157,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
         # 4. Calculate various metrics
         # 4.1 ODE satisfaction
         # Verify that the models output satisfies the given differential equation
-        for target_row in range(len(true_system_description)):
+        for target_row in range(len(true_system_description.rows())):
             # Eval mode because central_difference is used
             model.eval()
             likelihood.eval()
@@ -174,7 +169,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
             likelihood_MAP.eval()
             MAP_locals_values = model_MAP.prepare_numeric_ode_satisfaction_check()
             model_MAP_mean_generator = lambda x: model_MAP(x).mean
-            locals_values = model.prepare_numeric_ode_satisfaction_check()
+            MAP_locals_values = model.prepare_numeric_ode_satisfaction_check()
             mean_ode_satisfaction_error_MAP = calculate_differential_equation_error_numeric(true_system_description[target_row], model_MAP.sage_locals, model_MAP_mean_generator, test_x, locals_values=MAP_locals_values)
 
             with open(os.path.join(experiment_results_dir, f"{filename_addendum}_mean_ode_satisfaction_error_MLL.pkl"), "wb") as f:
@@ -197,19 +192,17 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
 
         # 4.3 MSE to train data
 
-        MLL_model_train_MSEs = [mean_squared_error(train_y[:, 0], model(train_x).mean[:, 0]), mean_squared_error(train_y[:, 1], model(train_x).mean[:, 1]), mean_squared_error(train_y[:, 2], model(train_x).mean[:, 2])]
-        MAP_model_train_MSEs = [mean_squared_error(train_y[:, 0], model_MAP(train_x).mean[:, 0]), mean_squared_error(train_y[:, 1], model_MAP(train_x).mean[:, 1]), mean_squared_error(train_y[:, 2], model_MAP(train_x).mean[:, 2])]
+        MLL_model_train_MSEs = [mean_squared_error(train_y[:, 0].detach(), model(train_x).mean[:, 0].detach()), mean_squared_error(train_y[:, 1].detach(), model(train_x).mean[:, 1].detach()), mean_squared_error(train_y[:, 2].detach(), model(train_x).mean[:, 2].detach())]
+        MAP_model_train_MSEs = [mean_squared_error(train_y[:, 0].detach(), model_MAP(train_x).mean[:, 0].detach()), mean_squared_error(train_y[:, 1].detach(), model_MAP(train_x).mean[:, 1].detach()), mean_squared_error(train_y[:, 2].detach(), model_MAP(train_x).mean[:, 2].detach())]
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL_model_train_MSEs.pkl"), "wb") as f:
             dill.dump(MLL_model_train_MSEs, f)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MAP_model_train_MSEs.pkl"), "wb") as f:
             dill.dump(MAP_model_train_MSEs, f)
 
         # 4.4 MSE to test data
-        MLL_model_test_MSEs = [mean_squared_error(test_y[:, 0], model(test_x).mean[:, 0]), mean_squared_error(test_y[:, 1], model(test_x).mean[:, 1]), mean_squared_error(test_y[:, 2], model(test_x).mean[:, 2])]
-        MAP_model_test_MSEs = [mean_squared_error(test_y[:, 0], model_MAP(test_x).mean[:, 0]), mean_squared_error(test_y[:, 1], model_MAP(test_x).mean[:, 1]), mean_squared_error(test_y[:, 2], model_MAP(test_x).mean[:, 2])]
+        MLL_model_test_MSEs = [mean_squared_error(test_y[:, 0].detach(), model(test_x).mean[:, 0].detach()), mean_squared_error(test_y[:, 1].detach(), model(test_x).mean[:, 1].detach()), mean_squared_error(test_y[:, 2].detach(), model(test_x).mean[:, 2].detach())]
+        MAP_model_test_MSEs = [mean_squared_error(test_y[:, 0].detach(), model_MAP(test_x).mean[:, 0].detach()), mean_squared_error(test_y[:, 1].detach(), model_MAP(test_x).mean[:, 1].detach()), mean_squared_error(test_y[:, 2].detach(), model_MAP(test_x).mean[:, 2].detach())]
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL_model_test_MSEs.pkl"), "wb") as f:
             dill.dump(MLL_model_test_MSEs, f)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MAP_model_test_MSEs.pkl"), "wb") as f:
             dill.dump(MAP_model_test_MSEs, f)
-
-        
