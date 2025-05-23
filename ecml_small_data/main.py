@@ -12,6 +12,8 @@ import torch
 
 torch.set_default_dtype(torch.float64)
 
+torch.manual_seed(42)
+
 R = QQ['x']; (x,) = R._first_ngens(1)
 true_system_description = matrix(R, Integer(2), Integer(3), [x**2 + 9.81/1.0, 0, -1/1.0, 0, x**2+9.81/2.0, -1/2.0])
 
