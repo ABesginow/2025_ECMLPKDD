@@ -83,7 +83,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
         # 2. Model training (10 random restarts with PyGRANSO) (try MLL and MAP with uninformed prior)
         model.train()
         likelihood.train()
-        unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=False)
+        unscaled_neg_MLL, model, likelihood, training_logs = granso_optimization(model, likelihood, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=False, maxit=300)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL.pkl"), "wb") as f:
             dill.dump(unscaled_neg_MLL, f)
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MLL_logs.pkl"), "wb") as f:
@@ -98,7 +98,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
 
         model_MAP.train()
         likelihood_MAP.train()
-        unscaled_neg_MAP, model_MAP, likelihood_MAP, training_logs_MAP = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=True)
+        unscaled_neg_MAP, model_MAP, likelihood_MAP, training_logs_MAP = granso_optimization(model_MAP, likelihood_MAP, train_x, train_y, random_restarts=10, uninformed=True, logarithmic_reinit=True, verbose=False, MAP=True, maxit=300)
 
         with open(os.path.join(experiment_results_dir, f"{filename_addendum}_MAP.pkl"), "wb") as f:
             dill.dump(unscaled_neg_MAP, f)
