@@ -1,4 +1,3 @@
-import copy
 import dill
 import gpytorch
 import itertools
@@ -8,6 +7,7 @@ from helpers.plotting_functions import plot_single_input_gp_posterior
 from helpers.util_functions import central_difference, calculate_differential_equation_error_numeric, calculate_differential_equation_error_symbolic
 from sage.all import *
 import sage
+import copy
 from sklearn.metrics import mean_squared_error
 import torch
 
@@ -18,7 +18,7 @@ torch.manual_seed(42)
 R = QQ['x']; (x,) = R._first_ngens(1)
 true_system_description = matrix(R, Integer(2), Integer(3), [x**2 + 9.81/1.0, 0, -1/1.0, 0, x**2+9.81/2.0, -1/2.0])
 
-for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [1, 2, 5, 10, 20, 50, 100], [0.0, 0.1, 0.2, 0.3]):
+for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [2, 5, 10, 15, 20, 30, 40, 50, 70, 100], [0.0, 0.1, 0.2, 0.3]):
     train_x = torch.linspace(START, END, COUNT)
 
     y0_func = lambda x: float(781/8000)*torch.sin(x)/x - float(1/20)*torch.cos(x)/x**2 + float(1/20)*torch.sin(x)/x**3
@@ -73,10 +73,10 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
 
 
         # 1. Model definition
-        likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
+        likelihood = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3, noise_constraint=gpytorch.constraints.Positive())
         model = LODEGP.LODEGP(train_x, train_y, likelihood, 3, ODE_name=system_name, verbose=False, system_parameters={"l1": l1_param_val, "l2": l2_param_val})
 
-        likelihood_MAP = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3)
+        likelihood_MAP = gpytorch.likelihoods.MultitaskGaussianLikelihood(num_tasks=3, noise_constraint=gpytorch.constraints.Positive())
         model_MAP = LODEGP.LODEGP(train_x, train_y, likelihood_MAP, 3, ODE_name=system_name, verbose=False, system_parameters={"l1": l1_param_val, "l2": l2_param_val})
 
 
