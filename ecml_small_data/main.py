@@ -35,7 +35,7 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
 
     # Bipendulum versions to test:
     # "Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Parameterized", "No system"
-    for (system_name, length_params) in itertools.chain(itertools.product(["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Sum eq2 diffed", "Bipendulum moon gravitation"], [[1.0, 2.0], [1.0, 3.0], [2.0, 3.0]]), [("Bipendulum Parameterized", [1.0, 2.0]),  ("No system", [1.0, 2.0])]):
+    for (system_name, length_params) in itertools.chain(itertools.product(["Bipendulum", "Bipendulum first equation", "Bipendulum second equation", "Bipendulum Sum", "Bipendulum Sum eq2 diffed", "Bipendulum moon gravitation"], [[1.0, 2.0], [1.0, 3.0], [2.0, 3.0], [3.0, 6.0]]), [("Bipendulum Parameterized", [1.0, 2.0]),  ("No system", [1.0, 2.0])]):
 
         l1_param_val = length_params[0]
         l2_param_val = length_params[1]
