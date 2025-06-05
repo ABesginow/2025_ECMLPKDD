@@ -19,6 +19,7 @@ R = QQ['x']; (x,) = R._first_ngens(1)
 true_system_description = matrix(R, Integer(2), Integer(3), [x**2 + 9.81/1.0, 0, -1/1.0, 0, x**2+9.81/2.0, -1/2.0])
 
 for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [2, 5, 10, 15, 20, 30, 40, 50, 70, 100], [0.0, 0.1, 0.2, 0.3]):
+
     train_x = torch.linspace(START, END, COUNT)
 
     y0_func = lambda x: float(781/8000)*torch.sin(x)/x - float(1/20)*torch.cos(x)/x**2 + float(1/20)*torch.sin(x)/x**3
@@ -27,9 +28,9 @@ for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [
     y0 = y0_func(train_x) 
     y1 = y1_func(train_x)
     y2 = y2_func(train_x)
-    y0 = y0 + torch.randn_like(train_x)*(torch.max(y0)*noise_level)
-    y1 = y1 + torch.randn_like(train_x)*(torch.max(y1)*noise_level)
-    y2 = y2 + torch.randn_like(train_x)*(torch.max(y2)*noise_level)
+    y0 = y0 + torch.randn_like(train_x)*(torch.max(y0_func(torch.linspace(START, END, 100)))*noise_level)
+    y1 = y1 + torch.randn_like(train_x)*(torch.max(y1_func(torch.linspace(START, END, 100)))*noise_level)
+    y2 = y2 + torch.randn_like(train_x)*(torch.max(y2_func(torch.linspace(START, END, 100)))*noise_level)
     train_y = torch.stack([y0, y1, y2], dim=-1)
 
     # Bipendulum versions to test:
