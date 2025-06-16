@@ -18,7 +18,7 @@ torch.manual_seed(42)
 R = QQ['x']; (x,) = R._first_ngens(1)
 true_system_description = matrix(R, Integer(2), Integer(3), [x**2 + 9.81/1.0, 0, -1/1.0, 0, x**2+9.81/2.0, -1/2.0])
 
-for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [2, 5, 10, 15, 20, 30, 40, 50, 70, 100], [0.0, 0.1, 0.2, 0.3]):
+for ((START, END), COUNT, noise_level) in itertools.product([(2, 12), (2, 3)], [2, 5, 10, 15, 20, 30, 40, 50, 70, 100], [0.03, 0.05]): #[0.0, 0.03, 0.05, 0.1, 0.2, 0.3]
 
     train_x = torch.linspace(START, END, COUNT)
 
